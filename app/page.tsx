@@ -1,6 +1,6 @@
 "use client";
 import { Input, Checkbox, Space, Divider, Row, Col, Button } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import style from "./page.module.css";
 const Home = () => {
@@ -12,6 +12,7 @@ const Home = () => {
     const addTodo = (todo: string) => {
         setTodos([...todos, todo]);
         setTodo("");
+        localStorage.setItem("todos", JSON.stringify([...todos, todo]));
     };
     const toggleDone = (e: CheckboxChangeEvent, index: number) => {
         if (e.target.checked) {
@@ -19,9 +20,13 @@ const Home = () => {
             setTodos(todos.filter((_, i) => i !== index)); // remove from todos
             setEditTodoIndex(null);
             setEditTodo("");
+            localStorage.setItem("done", JSON.stringify([...done, todos[index]]));
+            localStorage.setItem("todos", JSON.stringify(todos.filter((_, i) => i !== index)));
         } else {
             setTodos([...todos, done[index]]); // add to todos
             setDone(done.filter((_, i) => i !== index)); // remove from done
+            localStorage.setItem("todos", JSON.stringify([...todos, done[index]]));
+            localStorage.setItem("done", JSON.stringify(done.filter((_, i) => i !== index)));
         }
     };
     const edit = (index: number, value: string) => {
@@ -36,6 +41,17 @@ const Home = () => {
         setEditTodoIndex(null);
         setEditTodo("");
     };
+    useEffect(() => {
+        // get todos from localStorage on page load
+        const todos = localStorage.getItem("todos");
+        const done = localStorage.getItem("done");
+        if (todos) {
+            setTodos(JSON.parse(todos));
+        }
+        if (done) {
+            setDone(JSON.parse(done));
+        }
+    }, []);
     return (
         <div className={style.todo_list_wrapper}>
             <Row gutter={16}>
