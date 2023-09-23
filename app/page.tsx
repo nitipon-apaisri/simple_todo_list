@@ -1,95 +1,105 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import { Input, Checkbox, Space, Divider, Row, Col, Button } from "antd";
+import { useState } from "react";
+import type { CheckboxChangeEvent } from "antd/es/checkbox";
+import style from "./page.module.css";
+const Home = () => {
+    const [todos, setTodos] = useState<string[]>([]);
+    const [done, setDone] = useState<string[]>([]);
+    const [todo, setTodo] = useState<string>("");
+    const [editTodo, setEditTodo] = useState<string>("");
+    const [editTodoIndex, setEditTodoIndex] = useState<number | null>(null);
+    const addTodo = (todo: string) => {
+        setTodos([...todos, todo]);
+        setTodo("");
+    };
+    const toggleDone = (e: CheckboxChangeEvent, index: number) => {
+        if (e.target.checked) {
+            setDone([...done, todos[index]]); // add to done
+            setTodos(todos.filter((_, i) => i !== index)); // remove from todos
+            setEditTodoIndex(null);
+            setEditTodo("");
+        } else {
+            setTodos([...todos, done[index]]); // add to todos
+            setDone(done.filter((_, i) => i !== index)); // remove from done
+        }
+    };
+    const edit = (index: number, value: string) => {
+        setTodos(todos.map((todo, i) => (i === index ? value : todo)));
+        setEditTodoIndex(null);
+    };
+    const toggleEditTodo = (index: number, value: string) => {
+        setEditTodoIndex(index);
+        setEditTodo(value);
+    };
+    const cancelEditTodo = () => {
+        setEditTodoIndex(null);
+        setEditTodo("");
+    };
+    return (
+        <div className={style.todo_list_wrapper}>
+            <Row gutter={16}>
+                <Col span={12}>
+                    <h1>Todo List</h1>
+                    <div className={style.list}>
+                        {todos.map((todo, index) => (
+                            <div key={index}>
+                                <Space>
+                                    <Space>
+                                        <Checkbox checked={false} onChange={(e) => toggleDone(e, index)} />
+                                        {editTodoIndex === index ? (
+                                            <Input value={editTodo} onChange={(e) => setEditTodo(e.target.value)} onPressEnter={(e) => edit(index, (e.target as HTMLTextAreaElement).value)} />
+                                        ) : (
+                                            <span>{todo}</span>
+                                        )}
+                                    </Space>
+                                    <Space>
+                                        <span className={style.delete} onClick={() => setTodos(todos.filter((_, i) => i !== index))}>
+                                            Delete
+                                        </span>
+                                        {editTodoIndex === index ? (
+                                            <span className={style.edit} onClick={cancelEditTodo}>
+                                                Cancel
+                                            </span>
+                                        ) : (
+                                            <span className={style.edit} onClick={() => toggleEditTodo(index, todo)}>
+                                                Edit
+                                            </span>
+                                        )}
+                                    </Space>
+                                </Space>
+                            </div> // <-- new
+                        ))}
+                    </div>
+                </Col>
+                <Col span={12}>
+                    <h1>Check</h1>
+                    <div className={style.list}>
+                        {done.map((todo, index) => (
+                            <div key={index}>
+                                <Space>
+                                    <Checkbox onChange={(e) => toggleDone(e, index)} checked={true} />
+                                    <span className={style.checked}>{todo}</span>
+                                </Space>
+                            </div>
+                        ))}
+                    </div>
+                </Col>
+            </Row>
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <Divider />
+            <Row gutter={16}>
+                <Col span={22}>
+                    <Input placeholder="Add Todo" value={todo} onChange={(e) => setTodo(e.target.value)} onPressEnter={(e) => addTodo(todo)} />
+                </Col>
+                <Col span={2}>
+                    <Button type="primary" onClick={() => addTodo(todo)}>
+                        Add
+                    </Button>
+                </Col>
+            </Row>
         </div>
-      </div>
+    );
+};
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Home;
